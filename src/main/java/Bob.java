@@ -1,33 +1,6 @@
 import java.util.Scanner;
 
-class Task {
-    protected String description;
-    protected boolean isDone;
-
-    public Task(String description) {
-        this.description = description;
-        this.isDone = false;
-    }
-
-    public void markAsDone() {
-        this.isDone = true;
-    }
-
-    public void unmarkAsDone() {
-        this.isDone = false;
-    }
-
-    public String getStatusIcon() {
-        return isDone ? "X" : " ";
-    }
-
-    @Override
-    public String toString() {
-        return "[" + getStatusIcon() + "] " + description;
-    }
-}
-
-public class BOB {
+public class Bob {
     private static final int MAX_TASKS = 100;
     private static final Task[] tasks = new Task[MAX_TASKS];
     private static int taskCount = 0;
@@ -42,21 +15,32 @@ public class BOB {
         while (true) {
             String input = scanner.nextLine().trim();
             String[] parts = input.split(" ", 2);
+            String command = parts[0].toLowerCase();
 
-            if (input.equalsIgnoreCase("bye")) {
-                printGoodbyeMessage();
-                break;
-            } else if (input.equalsIgnoreCase("list")) {
-                printTasks();
-            } else if (parts[0].equalsIgnoreCase("mark")) {
-                handleMark(parts);
-            } else if (parts[0].equalsIgnoreCase("unmark")) {
-                handleUnmark(parts);
-            } else {
-                addTask(input);
+            switch (command) {
+                case "bye":
+                    printGoodbyeMessage();
+                    scanner.close();
+                    return;
+                case "list":
+                    printTasks();
+                    break;
+                case "mark":
+                    handleMark(parts);
+                    break;
+                case "unmark":
+                    handleUnmark(parts);
+                    break;
+                case "todo":
+                case "deadline":
+                case "event":
+                    addTask(parts);
+                    break;
+                default:
+                    System.out.println(" Unknown command! Use 'todo', 'deadline', 'event', 'mark', 'unmark', or 'list'.");
+                    break;
             }
         }
-        scanner.close();
     }
 
     private static void printDivider() {
@@ -118,21 +102,57 @@ public class BOB {
         }
     }
 
-    private static void addTask(String description) {
-        if (taskCount < MAX_TASKS) {
-            tasks[taskCount++] = new Task(description);
-            printDivider();
-            System.out.println(" Added: " + description);
-            printDivider();
-        } else {
+    private static void addTask(String[] parts) {
+        if (taskCount >= MAX_TASKS) {
             printDivider();
             System.out.println(" Task list is full!");
             printDivider();
+            return;
         }
+
+        if (parts.length < 2) {
+            System.out.println(" Please provide a task description.");
+            return;
+        }
+
+        String command = parts[0].toLowerCase();
+        String details = parts[1];
+
+        Task newTask;
+        switch (command) {
+            case "todo":
+                newTask = new Todo(details);
+                break;
+            case "deadline":
+                String[] deadlineParts = details.split(" /by ", 2);
+                if (deadlineParts.length < 2) {
+                    System.out.println(" Invalid deadline format! Use: deadline <task> /by <time>");
+                    return;
+                }
+                newTask = new Deadline(deadlineParts[0], deadlineParts[1]);
+                break;
+            case "event":
+                String[] eventParts = details.split(" /from | /to ", 3);
+                if (eventParts.length < 3) {
+                    System.out.println(" Invalid event format! Use: event <task> /from <time> /to <time>");
+                    return;
+                }
+                newTask = new Event(eventParts[0], eventParts[1], eventParts[2]);
+                break;
+            default:
+                System.out.println(" Unknown task type.");
+                return;
+        }
+
+        tasks[taskCount++] = newTask;
+        printDivider();
+        System.out.println(" Got it. I've added this task:");
+        System.out.println("   " + newTask);
+        System.out.println(" Now you have " + taskCount + " tasks in the list.");
+        printDivider();
     }
 
     private static boolean isValidTaskNumber(int taskNumber) {
         return taskNumber >= 0 && taskNumber < taskCount;
     }
 }
-
