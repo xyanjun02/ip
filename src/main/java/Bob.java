@@ -13,32 +13,39 @@ public class Bob {
         printDivider();
 
         while (true) {
-            String input = scanner.nextLine().trim();
-            String[] parts = input.split(" ", 2);
-            String command = parts[0].toLowerCase();
+            try {
+                String input = scanner.nextLine().trim();
+                if (input.isEmpty()) {
+                    throw new BobException(" Input cannot be empty. Please enter a command.");
+                }
 
-            switch (command) {
-                case "bye":
-                    printGoodbyeMessage();
-                    scanner.close();
-                    return;
-                case "list":
-                    printTasks();
-                    break;
-                case "mark":
-                    handleMark(parts);
-                    break;
-                case "unmark":
-                    handleUnmark(parts);
-                    break;
-                case "todo":
-                case "deadline":
-                case "event":
-                    addTask(parts);
-                    break;
-                default:
-                    System.out.println(" Unknown command! Use 'todo', 'deadline', 'event', 'mark', 'unmark', or 'list'.");
-                    break;
+                String[] parts = input.split(" ", 2);
+                String command = parts[0].toLowerCase();
+
+                switch (command) {
+                    case "bye":
+                        printGoodbyeMessage();
+                        scanner.close();
+                        return;
+                    case "list":
+                        printTasks();
+                        break;
+                    case "mark":
+                        handleMark(parts);
+                        break;
+                    case "unmark":
+                        handleUnmark(parts);
+                        break;
+                    case "todo":
+                    case "deadline":
+                    case "event":
+                        addTask(parts);
+                        break;
+                    default:
+                        throw new BobException(" What that mean? Use 'todo', 'deadline', 'event', 'mark', 'unmark', or 'list'.");
+                }
+            } catch (BobException e) {
+                System.out.println(e.getMessage());
             }
         }
     }
@@ -70,87 +77,93 @@ public class Bob {
 
     private static void handleMark(String[] parts) {
         try {
-            int taskNumber = Integer.parseInt(parts[1]) - 1;
-            if (isValidTaskNumber(taskNumber)) {
-                tasks[taskNumber].markAsDone();
-                printDivider();
-                System.out.println(" Nice! I've marked this task as done:");
-                System.out.println("   " + tasks[taskNumber]);
-                printDivider();
-            } else {
-                System.out.println(" Invalid task number!");
+            if (parts.length < 2) {
+                throw new BobException(" Please specify a task number to mark.");
             }
-        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            System.out.println(" Please enter a valid task number.");
+            int taskNumber = Integer.parseInt(parts[1]) - 1;
+            if (!isValidTaskNumber(taskNumber)) {
+                throw new BobException(" Sorry that is out of my range! \uD83D\uDE22 Please enter a valid task number.");
+            }
+            tasks[taskNumber].markAsDone();
+            printDivider();
+            System.out.println(" Nice! I've marked this task as done:");
+            System.out.println("   " + tasks[taskNumber]);
+            printDivider();
+        } catch (NumberFormatException e) {
+            System.out.println(" Please enter a valid numeric task number.");
+        } catch (BobException e) {
+            System.out.println(e.getMessage());
         }
     }
 
     private static void handleUnmark(String[] parts) {
         try {
-            int taskNumber = Integer.parseInt(parts[1]) - 1;
-            if (isValidTaskNumber(taskNumber)) {
-                tasks[taskNumber].unmarkAsDone();
-                printDivider();
-                System.out.println(" OK, I've marked this task as not done yet:");
-                System.out.println("   " + tasks[taskNumber]);
-                printDivider();
-            } else {
-                System.out.println(" Invalid task number!");
+            if (parts.length < 2) {
+                throw new BobException(" Please specify a task number to unmark.");
             }
-        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            System.out.println(" Please enter a valid task number.");
+            int taskNumber = Integer.parseInt(parts[1]) - 1;
+            if (!isValidTaskNumber(taskNumber)) {
+                throw new BobException(" Sorry that is out of my range! \uD83D\uDE22 Please enter a valid task number.");
+            }
+            tasks[taskNumber].unmarkAsDone();
+            printDivider();
+            System.out.println(" OK, I've marked this task as not done yet:");
+            System.out.println("   " + tasks[taskNumber]);
+            printDivider();
+        } catch (NumberFormatException e) {
+            System.out.println(" Please enter a valid numeric task number.");
+        } catch (BobException e) {
+            System.out.println(e.getMessage());
         }
     }
 
     private static void addTask(String[] parts) {
-        if (taskCount >= MAX_TASKS) {
+        try {
+            if (taskCount >= MAX_TASKS) {
+                throw new BobException(" That is too much to handle! \uD83D\uDE35 Cannot add more tasks.");
+            }
+
+            if (parts.length < 2) {
+                throw new BobException(" Please provide a task description.");
+            }
+
+            String command = parts[0].toLowerCase();
+            String details = parts[1];
+
+            Task newTask;
+            switch (command) {
+                case "todo":
+                    newTask = new Todo(details);
+                    break;
+                case "deadline":
+                    String[] deadlineParts = details.split(" /by ", 2);
+                    if (deadlineParts.length < 2) {
+                        throw new BobException(" Sorry I don't really understand! \uD83D\uDE15 Use: deadline <task> /by <time>");
+                    }
+                    newTask = new Deadline(deadlineParts[0], deadlineParts[1]);
+                    break;
+                case "event":
+                    String[] eventParts = details.split(" /from | /to ", 3);
+                    if (eventParts.length < 3) {
+                        throw new BobException(" Sorry I don't really understand! \uD83D\uDE15 Use: event <task> /from <time> /to <time>");
+                    }
+                    newTask = new Event(eventParts[0], eventParts[1], eventParts[2]);
+                    break;
+                default:
+                    throw new BobException(" Unknown task type.");
+            }
+
+            tasks[taskCount++] = newTask;
             printDivider();
-            System.out.println(" Task list is full!");
+            System.out.println(" Got it. I've added this task:");
+            System.out.println("   " + newTask);
+            System.out.println(" Now you have " + taskCount + " tasks in the list.");
             printDivider();
-            return;
+        } catch (BobException e) {
+            System.out.println(e.getMessage());
         }
-
-        if (parts.length < 2) {
-            System.out.println(" Please provide a task description.");
-            return;
-        }
-
-        String command = parts[0].toLowerCase();
-        String details = parts[1];
-
-        Task newTask;
-        switch (command) {
-            case "todo":
-                newTask = new Todo(details);
-                break;
-            case "deadline":
-                String[] deadlineParts = details.split(" /by ", 2);
-                if (deadlineParts.length < 2) {
-                    System.out.println(" Invalid deadline format! Use: deadline <task> /by <time>");
-                    return;
-                }
-                newTask = new Deadline(deadlineParts[0], deadlineParts[1]);
-                break;
-            case "event":
-                String[] eventParts = details.split(" /from | /to ", 3);
-                if (eventParts.length < 3) {
-                    System.out.println(" Invalid event format! Use: event <task> /from <time> /to <time>");
-                    return;
-                }
-                newTask = new Event(eventParts[0], eventParts[1], eventParts[2]);
-                break;
-            default:
-                System.out.println(" Unknown task type.");
-                return;
-        }
-
-        tasks[taskCount++] = newTask;
-        printDivider();
-        System.out.println(" Got it. I've added this task:");
-        System.out.println("   " + newTask);
-        System.out.println(" Now you have " + taskCount + " tasks in the list.");
-        printDivider();
     }
+
 
     private static boolean isValidTaskNumber(int taskNumber) {
         return taskNumber >= 0 && taskNumber < taskCount;
