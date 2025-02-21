@@ -2,11 +2,16 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Bob {
-    private static final ArrayList<Task> tasks = new ArrayList<>();
+    private static final ArrayList<Task> tasks = new ArrayList<>();  // ✅ Changed to ArrayList
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-       printWelcomeMessage();
+        tasks.addAll(Storage.loadTasks());  // ✅ Load tasks from file at startup
+
+        printDivider();
+        System.out.println(" Hello! I'm BOB");
+        System.out.println(" What can I do for you? 😀");
+        printDivider();
 
         while (true) {
             try {
@@ -43,6 +48,8 @@ public class Bob {
                     default:
                         throw new BobException(" What that mean? Use 'todo', 'deadline', 'event', 'mark', 'unmark', 'delete', or 'list'.");
                 }
+
+                Storage.saveTasks(tasks);  // ✅ Save tasks after each change
             } catch (BobException e) {
                 System.out.println(e.getMessage());
             }
@@ -112,7 +119,7 @@ public class Bob {
             }
             int taskNumber = Integer.parseInt(parts[1]) - 1;
             if (taskNumber < 0 || taskNumber >= tasks.size()) {
-                throw new BobException(" Sorry that is out of my range! \uD83D\uDE22 Please enter a valid task number.");
+                throw new BobException(" Sorry that is out of my range! 😢 Please enter a valid task number.");
             }
             tasks.get(taskNumber).markAsDone();
             printDivider();
@@ -133,7 +140,7 @@ public class Bob {
             }
             int taskNumber = Integer.parseInt(parts[1]) - 1;
             if (taskNumber < 0 || taskNumber >= tasks.size()) {
-                throw new BobException(" Sorry that is out of my range! \uD83D\uDE22 Please enter a valid task number.");
+                throw new BobException(" Sorry that is out of my range! 😢 Please enter a valid task number.");
             }
             tasks.get(taskNumber).unmarkAsDone();
             printDivider();
@@ -164,14 +171,14 @@ public class Bob {
                 case "deadline":
                     String[] deadlineParts = details.split(" /by ", 2);
                     if (deadlineParts.length < 2) {
-                        throw new BobException(" Sorry I don't really understand! \uD83D\uDE15 Use: deadline <task> /by <time>");
+                        throw new BobException(" Sorry I don't really understand! 😕 Use: deadline <task> /by <time>");
                     }
                     newTask = new Deadline(deadlineParts[0], deadlineParts[1]);
                     break;
                 case "event":
                     String[] eventParts = details.split(" /from | /to ", 3);
                     if (eventParts.length < 3) {
-                        throw new BobException(" Sorry I don't really understand! \uD83D\uDE15 Use: event <task> /from <time> /to <time>");
+                        throw new BobException(" Sorry I don't really understand! 😕 Use: event <task> /from <time> /to <time>");
                     }
                     newTask = new Event(eventParts[0], eventParts[1], eventParts[2]);
                     break;
@@ -179,7 +186,7 @@ public class Bob {
                     throw new BobException(" Unknown task type.");
             }
 
-            tasks.add(newTask);  // ✅ `ArrayList` makes adding simple
+            tasks.add(newTask);  // ✅ Using ArrayList instead of array
             printDivider();
             System.out.println(" Got it. I've added this task:");
             System.out.println("   " + newTask);
