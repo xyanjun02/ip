@@ -1,12 +1,13 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Bob {
-    private static final int MAX_TASKS = 100;
-    private static final Task[] tasks = new Task[MAX_TASKS];
-    private static int taskCount = 0;
+    private static final ArrayList<Task> tasks = new ArrayList<>();  // ✅ Changed to ArrayList
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
+        tasks.addAll(Storage.loadTasks());  // ✅ Load tasks from file at startup
+
         printDivider();
         System.out.println(" Hello! I'm BOB");
         System.out.println(" What can I do for you? 😀");
@@ -44,6 +45,8 @@ public class Bob {
                     default:
                         throw new BobException(" What that mean? Use 'todo', 'deadline', 'event', 'mark', 'unmark', or 'list'.");
                 }
+
+                Storage.saveTasks(tasks);  // ✅ Save tasks after each change
             } catch (BobException e) {
                 System.out.println(e.getMessage());
             }
@@ -65,11 +68,11 @@ public class Bob {
         printDivider();
         System.out.println(" Here are the tasks in your list:");
 
-        if (taskCount == 0) {
+        if (tasks.isEmpty()) {
             System.out.println(" No tasks added yet.");
         } else {
-            for (int i = 0; i < taskCount; i++) {
-                System.out.println((i + 1) + ". " + tasks[i]);
+            for (int i = 0; i < tasks.size(); i++) {
+                System.out.println((i + 1) + ". " + tasks.get(i));
             }
         }
         printDivider();
@@ -81,13 +84,13 @@ public class Bob {
                 throw new BobException(" Please specify a task number to mark.");
             }
             int taskNumber = Integer.parseInt(parts[1]) - 1;
-            if (!isValidTaskNumber(taskNumber)) {
-                throw new BobException(" Sorry that is out of my range! \uD83D\uDE22 Please enter a valid task number.");
+            if (taskNumber < 0 || taskNumber >= tasks.size()) {
+                throw new BobException(" Sorry that is out of my range! 😢 Please enter a valid task number.");
             }
-            tasks[taskNumber].markAsDone();
+            tasks.get(taskNumber).markAsDone();
             printDivider();
             System.out.println(" Nice! I've marked this task as done:");
-            System.out.println("   " + tasks[taskNumber]);
+            System.out.println("   " + tasks.get(taskNumber));
             printDivider();
         } catch (NumberFormatException e) {
             System.out.println(" Please enter a valid numeric task number.");
@@ -102,13 +105,13 @@ public class Bob {
                 throw new BobException(" Please specify a task number to unmark.");
             }
             int taskNumber = Integer.parseInt(parts[1]) - 1;
-            if (!isValidTaskNumber(taskNumber)) {
-                throw new BobException(" Sorry that is out of my range! \uD83D\uDE22 Please enter a valid task number.");
+            if (taskNumber < 0 || taskNumber >= tasks.size()) {
+                throw new BobException(" Sorry that is out of my range! 😢 Please enter a valid task number.");
             }
-            tasks[taskNumber].unmarkAsDone();
+            tasks.get(taskNumber).unmarkAsDone();
             printDivider();
             System.out.println(" OK, I've marked this task as not done yet:");
-            System.out.println("   " + tasks[taskNumber]);
+            System.out.println("   " + tasks.get(taskNumber));
             printDivider();
         } catch (NumberFormatException e) {
             System.out.println(" Please enter a valid numeric task number.");
@@ -119,10 +122,6 @@ public class Bob {
 
     private static void addTask(String[] parts) {
         try {
-            if (taskCount >= MAX_TASKS) {
-                throw new BobException(" That is too much to handle! \uD83D\uDE35 Cannot add more tasks.");
-            }
-
             if (parts.length < 2) {
                 throw new BobException(" Please provide a task description.");
             }
@@ -138,14 +137,14 @@ public class Bob {
                 case "deadline":
                     String[] deadlineParts = details.split(" /by ", 2);
                     if (deadlineParts.length < 2) {
-                        throw new BobException(" Sorry I don't really understand! \uD83D\uDE15 Use: deadline <task> /by <time>");
+                        throw new BobException(" Sorry I don't really understand! 😕 Use: deadline <task> /by <time>");
                     }
                     newTask = new Deadline(deadlineParts[0], deadlineParts[1]);
                     break;
                 case "event":
                     String[] eventParts = details.split(" /from | /to ", 3);
                     if (eventParts.length < 3) {
-                        throw new BobException(" Sorry I don't really understand! \uD83D\uDE15 Use: event <task> /from <time> /to <time>");
+                        throw new BobException(" Sorry I don't really understand! 😕 Use: event <task> /from <time> /to <time>");
                     }
                     newTask = new Event(eventParts[0], eventParts[1], eventParts[2]);
                     break;
@@ -153,19 +152,14 @@ public class Bob {
                     throw new BobException(" Unknown task type.");
             }
 
-            tasks[taskCount++] = newTask;
+            tasks.add(newTask);  // ✅ Using ArrayList instead of array
             printDivider();
             System.out.println(" Got it. I've added this task:");
             System.out.println("   " + newTask);
-            System.out.println(" Now you have " + taskCount + " tasks in the list.");
+            System.out.println(" Now you have " + tasks.size() + " tasks in the list.");
             printDivider();
         } catch (BobException e) {
             System.out.println(e.getMessage());
         }
-    }
-
-
-    private static boolean isValidTaskNumber(int taskNumber) {
-        return taskNumber >= 0 && taskNumber < taskCount;
     }
 }
