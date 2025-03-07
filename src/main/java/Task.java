@@ -16,21 +16,25 @@ public abstract class Task {
     }
 
     public String getStatusIcon() {
-        return isDone ? "1" : "0";  // ✅ Save as 1 (done) or 0 (not done)
+        return isDone ? "X" : " ";  // Display 'X' when done, otherwise a blank space
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     @Override
     public String toString() {
-        return "[" + getStatusIcon() + "] " + description;
+        return getDescription();
     }
 
-    // ✅ Convert task to a savable format
+    // Convert task to a savable format
     public abstract String toFileFormat();
 
-    // ✅ Convert from file format back to Task
+    // Convert from file format back to Task
     public static Task fromFileFormat(String line) {
         String[] parts = line.split(" \\| ");
-        String type = parts[0];  // T, D, or E
+        String type = parts[0];
         boolean isDone = parts[1].equals("1");
         String description = parts[2];
 
