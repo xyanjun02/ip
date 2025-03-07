@@ -1,7 +1,17 @@
 import java.util.ArrayList;
+
+// AddCommand class
+/**
+ * The {@code AddCommand} class handles adding new tasks to the task list.
+ */
 public class AddCommand extends Command {
     private final String[] parts;
 
+    /**
+     * Constructs an {@code AddCommand} with the specified input parts.
+     *
+     * @param parts An array of strings where the first element is the command and the second is the task details.
+     */
     public AddCommand(String[] parts) {
         this.parts = parts;
     }

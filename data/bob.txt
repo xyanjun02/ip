@@ -1,2 +1,2 @@
-T |   | ride a bike
+T | X | ride a bike
 E |   | tutorial | 1900 | 2000

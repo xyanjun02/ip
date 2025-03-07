@@ -1,4 +1,10 @@
 import java.util.ArrayList;
+
+// Ui class
+/**
+ * The {@code Ui} class handles all user interactions, including reading input and displaying output.
+ * It provides methods for showing messages, task lists, and error handling.
+ */
 public class Ui {
     public static final String ERROR_EMPTY_INPUT = "Input cannot be empty. Please enter a command.";
     public static final String ERROR_OUT_OF_RANGE = "Sorry, that is out of range! Please enter a valid task number.";
