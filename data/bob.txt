@@ -1,2 +1,2 @@
-T | 0 | read
-E | 0 | yanjun attend cs2113 lecture Friday 21 feb 2025 | 4 | 6pm
+T | 0 | ride a bike
+E | 0 | tutorial | 1900 | 2000
