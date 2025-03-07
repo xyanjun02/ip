@@ -22,8 +22,8 @@ public class Parser {
             case "unmark" -> new UnmarkCommand(parts);
             case "todo", "deadline", "event" -> new AddCommand(parts);
             case "delete" -> new DeleteCommand(parts);
-            default -> throw new BobException(" What that mean? Use 'todo', 'deadline', 'event', 'mark', 'unmark', 'delete' or 'list'.");
+            case "find" -> new FindCommand(parts);
+            default -> throw new BobException(" What that mean? Use 'todo', 'deadline', 'event', 'mark', 'unmark', 'delete', 'list', or 'find'.");
         };
     }
 }
-
