@@ -31,14 +31,14 @@ public class AddCommand extends Command {
             case "deadline":
                 String[] deadlineParts = details.split(" /by ", 2);
                 if (deadlineParts.length < 2) {
-                    throw new BobException(" Sorry I don't really understand what you mean! 😕 Use: deadline <task> /by <time>");
+                    throw new BobException(" Sorry I don't really understand what you mean. Use: deadline <task> /by <time>");
                 }
                 newTask = new Deadline(deadlineParts[0], deadlineParts[1]);
                 break;
             case "event":
                 String[] eventParts = details.split(" /from | /to ", 3);
                 if (eventParts.length < 3) {
-                    throw new BobException(" Sorry I don't really understand what you mean! 😕 Use: event <task> /from <time> /to <time>");
+                    throw new BobException(" Sorry I don't really understand what you mean. Use: event <task> /from <time> /to <time>");
                 }
                 newTask = new Event(eventParts[0], eventParts[1], eventParts[2]);
                 break;

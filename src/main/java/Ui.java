@@ -15,7 +15,7 @@ public class Ui {
 
     public static void printGoodbyeMessage() {
         printDivider();
-        System.out.println(" Bye! Hope to see you again soon! 😀");
+        System.out.println(" Bye! Hope to see you again soon!");
         System.out.println(" - BOB");
         printDivider();
     }
@@ -23,7 +23,7 @@ public class Ui {
     public static void printWelcomeMessage() {
         printDivider();
         System.out.println(" Hello! I'm BOB");
-        System.out.println(" What can I do for you? 😀");
+        System.out.println(" What can I do for you? ");
         printDivider();
     }
 
